@@ -1,0 +1,7 @@
+ZODB
+pymongo
+mysql-connector-python
+pandas
+numpy
+matplotlib
+scikit-learn
