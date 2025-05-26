@@ -32,4 +32,4 @@
 
 ---
 
-Este relatório confirma que todos os requisitos técnicos do projeto foram atendidos conforme solicitado.
+

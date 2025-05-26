@@ -166,6 +166,31 @@ def remove_product(sql_handler):
     except Exception as e:
         print(f"Erro ao remover produto: {e}")
 
+def list_reviews(sql_handler, mongo_handler):
+    product_id = input("Digite o ID do produto para listar comentários: ").strip()
+    if not product_id.isdigit():
+        print("ID inválido.")
+        return
+    product_id_int = int(product_id)
+    comments = mongo_handler.get_comments(product_id_int)
+    if not comments:
+        print("Nenhum comentário encontrado para este produto.")
+        return
+    print("\nComentários para o produto ID", product_id_int)
+    print("-------------------------------")
+    for idx, comment in enumerate(comments, start=1):
+        print(f"{idx}. {comment.get('comment', '')}")
+
+def list_all_reviews(mongo_handler):
+    comments = list(mongo_handler.db['comments'].find())
+    if not comments:
+        print("Nenhum comentário encontrado.")
+        return
+    print("\nTodas as avaliações cadastradas")
+    print("--------------------------------")
+    for idx, comment in enumerate(comments, start=1):
+        print(f"{idx}. Produto ID {comment.get('product_id', '')}: {comment.get('comment', '')}")
+
 def main():
     print("Iniciando Sistema de Gerenciamento de Produtos")
 
@@ -367,30 +392,16 @@ def main():
             def print_reviews_menu():
                 print("\n--- Avaliações de Clientes ---")
                 print("1. Listar avaliações de produtos")
+                print("2. Listar todas as avaliações")
                 print("0. Voltar ao menu principal")
-
-            def list_reviews(sql_handler):
-                query = """
-                SELECT a.id_avaliacao, p.nome_produto, c.nome as cliente_nome, a.data_avaliacao, a.nota, a.comentario
-                FROM avaliacao a
-                LEFT JOIN produto p ON a.id_produto = p.id_produto
-                LEFT JOIN cliente c ON a.id_cliente = c.id_cliente
-                ORDER BY a.data_avaliacao DESC
-                """
-                reviews = sql_handler.execute_query(query)
-                if not reviews:
-                    print("Nenhuma avaliação encontrada.")
-                    return
-                print("\nID Avaliação | Produto                      | Cliente               | Data Avaliação       | Nota | Comentário")
-                print("------------|------------------------------|-----------------------|----------------------|------|-----------")
-                for review in reviews:
-                    print(f"{review['id_avaliacao']: <12}| {review['nome_produto'] if review['nome_produto'] else 'N/A': <28}| {review['cliente_nome'] if review['cliente_nome'] else 'N/A': <21}| {review['data_avaliacao']} | {review['nota']: <4} | {review['comentario']}")
 
             while True:
                 print_reviews_menu()
                 review_choice = input("Escolha uma opção: ").strip()
                 if review_choice == '1':
-                    list_reviews(sql_handler)
+                    list_reviews(sql_handler, mongo_handler)
+                elif review_choice == '2':
+                    list_all_reviews(mongo_handler)
                 elif review_choice == '0':
                     break
                 else:
